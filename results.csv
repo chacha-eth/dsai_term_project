@@ -1,0 +1,13 @@
+Topology,Island,Loss,Generation,Worker,Execution Time (s)
+Bidirectional Ring,0,29,405,0,272.71
+Bidirectional Ring,1,29,405,0,272.71
+Bidirectional Ring,2,29,405,0,272.71
+Bidirectional Ring,3,29,405,0,272.71
+Unidirectional Ring,0,25,679,4,197.54
+Unidirectional Ring,1,25,679,4,197.54
+Unidirectional Ring,2,25,679,4,197.54
+Unidirectional Ring,3,25,679,4,197.54
+Fully Connected,0,26,975,3,418.1
+Fully Connected,1,26,96,4,418.1
+Fully Connected,2,26,975,3,418.1
+Fully Connected,3,26,975,3,418.1
