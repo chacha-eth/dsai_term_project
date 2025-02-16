@@ -1,54 +1,83 @@
-# dsai_term_project
-# check mpirun runns inside each container 
--  first enter to the container,you can also check with out entering to the container,which i did not set in my 
-   conttainers
-   - mpirun --allow-run-as-root -np 4 echo "MPI Test
-## note when excedding the number of processors 
-here are not enough slots available in the system to satisfy the 7
-slots that were requested by the application:
+# **Project Setup Instructions**
 
-  python3
+## **Getting Started**
 
-Either request fewer slots for your application, or make more slots
-available for use.
+1. **Build the Docker Image**  
+   Ensure the Docker image is built before running the containers:
+   ```bash
+   docker build -t my_experiment .
+   ```
 
-A "slot" is the Open MPI term for an allocatable unit where we can
-launch a process.  The number of slots available are defined by the
-environment in which Open MPI processes are run:
+2. **Run the Docker Containers**  
+   Execute the script to create **4 containers**, each with **specific CPU cores and RAM**:
+   ```bash
+   bash run_container.sh
+   ```
+   This script:
+   - Starts **4 separate containers**.
+   - Assigns **specific CPU cores and RAM** to each container.
+   - Ensures **isolation** between experiment runs.
 
-  1. Hostfile, via "slots=N" clauses (N defaults to number of
-     processor cores if not provided)
-  2. The --host command line parameter, via a ":N" suffix on the
-     hostname (N defaults to 1 if not provided)
-  3. Resource manager (e.g., SLURM, PBS/Torque, LSF, etc.)
-  4. If none of a hostfile, the --host command line parameter, or an
-     RM is present, Open MPI defaults to the number of processor cores
+---
 
-In all the above cases, if you want Open MPI to default to the number
-of hardware threads instead of the number of processor cores, use the
---use-hwthread-cpus option.
+## **Setting Up SSH in Each Container**  
+(Automation for this step is planned for future updates.)
 
-Alternatively, you can use the --oversubscribe option to ignore the
-number of available slots when deciding the number of processes to
-launch.
+3. **Manually configure SSH inside each container**:
+   ```bash
+   apt-get update && apt-get install -y openssh-server
+   ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa   (create key in one of the nodes)
+   cat ~/.ssh/id_rsa.pub | ssh root@node2 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys" ,repeat for node3,node4
+   service ssh start
+   ```
 
-# testing mpi code inside container 
-  - mpirun -np 6 --allow-run-as-root python3 mpi_hello.py
+4. **Verify SSH connectivity**:
+   ```bash
+   ssh root@[node2,node3,node4]
+   ```
 
-# ssh install and solution to the problem i faced 
-      - apt update && apt install -y openssh-server
-      - ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa   (create key in one of the nodes)
-      - ssh-copy-id root@node2    (copy key to each node,allows sshing without password but asks first time)
-      - cat ~/.ssh/id_rsa.pub | ssh root@node2 "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"  (it does not ask password for copy)
+---
 
-# running 
-  - mpirun --hostfile hostfile -np 24 --mca hwloc_base_binding_policy none python3 mpi_hello.py
-# to use host computer 
-   1.addes on sudo nano /etc/hosts this 
-                172.19.0.2 nod1
-                172.19.0.3 nod2
-                172.19.0.4 nod3
-                172.19.0.5 nod4
-# set environment variables important
-  export OMPI_ALLOW_RUN_AS_ROOT=1
-  export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+## **Running the MPI-Based Genetic Algorithm**
+
+5. **Set up MPI on the Master Node**  
+   Run the following commands to **allow MPI execution as root**:
+   ```bash
+   export OMPI_ALLOW_RUN_AS_ROOT=1
+   export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+   ```
+
+6. **Run the Genetic Algorithm across all containers**:
+   ```bash
+   mpirun --hostfile hostfile -np 24 python3 run_ga.py
+   ```
+   This command:
+   - Uses `mpirun` for **multi-container execution**.
+   - Reads available hosts from **`hostfile`**.
+   - Runs **24 parallel processes** (`-np 24`).
+   - Executes **`run_ga.py`**, the genetic algorithm script.
+
+---
+
+## **Post-Experiment Cleanup**
+
+7. **Stop and remove all running containers**:
+   ```bash
+   docker stop $(docker ps -q)
+   docker rm $(docker ps -aq)
+   ```
+
+8. **(Optional) Remove the Docker image**:
+   ```bash
+   docker rmi my_experiment
+   ```
+
+---
+
+## **Conclusion**  
+This guide ensures **efficient parallel execution** of the genetic algorithm across **multiple Docker containers** using **MPI**. Future updates will include **automated SSH setup** for better scalability.
+
+---
+
+
+

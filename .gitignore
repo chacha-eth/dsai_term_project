@@ -3,3 +3,4 @@ env/
 archive/
 checkpoints/
 mpi_hello.py
+README_old.md
