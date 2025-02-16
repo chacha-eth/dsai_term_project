@@ -5,7 +5,7 @@
 1. **Build the Docker Image**  
    Ensure the Docker image is built before running the containers:
    ```bash
-   docker build -t my_experiment .
+   docker build -t mpi-propulate .
    ```
 
 2. **Run the Docker Containers**  
